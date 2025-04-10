@@ -35,7 +35,25 @@ If the script fails, you can manually set up the waitlist table:
    -- Create policy to allow inserts
    CREATE POLICY "Allow anonymous inserts" ON public.waitlist
      FOR INSERT WITH CHECK (true);
+   
+   -- Create policy to allow selects (to check if email exists)
+   CREATE POLICY "Allow anonymous selects" ON public.waitlist
+     FOR SELECT USING (true);
    ```
+
+## Deployment to Vercel
+
+When deploying to Vercel, you need to add your Supabase environment variables:
+
+1. Go to your Vercel project dashboard
+2. Click on "Settings" → "Environment Variables"
+3. Add the following variables with your actual values:
+   - Name: `NEXT_PUBLIC_SUPABASE_URL`  
+     Value: Your Supabase URL (e.g., https://yourproject.supabase.co)
+   - Name: `NEXT_PUBLIC_SUPABASE_ANON_KEY`  
+     Value: Your Supabase anon key
+4. Click "Save"
+5. Redeploy your application for the changes to take effect
 
 ## Troubleshooting Waitlist Issues
 

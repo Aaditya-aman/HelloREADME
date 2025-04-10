@@ -3,6 +3,18 @@ import { supabase } from '@/lib/supabase';
 
 export async function GET() {
   try {
+    // Check if Supabase credentials are available
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ 
+        status: 'error',
+        message: 'Supabase configuration missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.',
+        exists: false,
+      }, { status: 500 });
+    }
+    
     // Check if the waitlist table exists
     const { data, error, count } = await supabase
       .from('waitlist')

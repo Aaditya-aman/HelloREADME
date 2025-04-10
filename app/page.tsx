@@ -48,6 +48,16 @@ export default function Home() {
     setIsSubmitting(true);
     
     try {
+      // Check if Supabase is properly configured
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+        // Fallback for demo mode - just show success message
+        console.log("Demo mode - no actual Supabase connection.");
+        toast.success("Thank you for your interest! This is a demo, so no data was saved.");
+        setEmail("");
+        setIsSubmitting(false);
+        return;
+      }
+      
       console.log("Submitting email:", email);
       const result = await addToWaitlist(email);
       console.log("Waitlist submission result:", result);

@@ -1,19 +1,32 @@
 import { createClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
+// Initialize with empty values - helps with TypeScript
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
+// Log warning if credentials are missing
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Missing Supabase credentials. Waitlist functionality may not work properly.');
   console.log('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing');
   console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Set' : 'Missing');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create Supabase client - this will work with TypeScript
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
 export async function addToWaitlist(email: string) {
   try {
     console.log("Starting waitlist submission process for:", email);
+    
+    // Check for valid credentials
+    if (!supabaseUrl || !supabaseAnonKey) {
+      return { 
+        success: false, 
+        error: new Error('Supabase not configured'), 
+        message: 'The waitlist is temporarily unavailable. Please try again later.' 
+      };
+    }
     
     if (!email || !email.includes('@')) {
       return { 
