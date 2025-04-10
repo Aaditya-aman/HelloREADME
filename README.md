@@ -55,6 +55,20 @@ When deploying to Vercel, you need to add your Supabase environment variables:
 4. Click "Save"
 5. Redeploy your application for the changes to take effect
 
+### Troubleshooting Vercel Deployment
+
+If you encounter build errors related to Supabase on Vercel:
+
+1. **Missing Environment Variables**: Make sure you've added the environment variables in the Vercel dashboard, not just in your local .env.local file.
+
+2. **WebSocket Dependencies Warnings**: If you see warnings about missing `bufferutil` or `utf-8-validate` dependencies, these are optional and won't affect functionality.
+
+3. **Build Errors During API Route Collection**: If you get errors like "Failed to collect page data for /api/waitlist", make sure your API routes don't initialize Supabase client during build time. The code has been updated to handle this.
+
+4. **Database Connection Issues**: After deployment, check the browser console and server logs for any connection issues. You might need to update your Supabase RLS policies.
+
+5. **Demo Mode**: When environment variables are missing, the app will run in "demo mode" where waitlist submissions are simulated but not actually saved to the database.
+
 ## Troubleshooting Waitlist Issues
 
 If you encounter issues with the waitlist functionality:

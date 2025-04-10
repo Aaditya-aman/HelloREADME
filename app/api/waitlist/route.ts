@@ -1,5 +1,17 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Create Supabase client on demand instead of importing it
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  
+  if (!supabaseUrl || !supabaseKey) {
+    return null;
+  }
+  
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 export async function GET() {
   try {
@@ -11,6 +23,17 @@ export async function GET() {
       return NextResponse.json({ 
         status: 'error',
         message: 'Supabase configuration missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.',
+        exists: false,
+      }, { status: 500 });
+    }
+    
+    // Create client on demand
+    const supabase = getSupabaseClient();
+    
+    if (!supabase) {
+      return NextResponse.json({ 
+        status: 'error',
+        message: 'Failed to initialize Supabase client.',
         exists: false,
       }, { status: 500 });
     }

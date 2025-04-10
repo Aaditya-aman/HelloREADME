@@ -7,15 +7,28 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('Missing Supabase credentials. Please check your .env.local file.');
+  console.log('\nTo configure Supabase:');
+  console.log('1. Create a Supabase account at https://supabase.com');
+  console.log('2. Create a new project');
+  console.log('3. Copy your project URL and anon key from Settings > API');
+  console.log('4. Create a .env.local file with:');
+  console.log('   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here');
+  console.log('   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here');
   process.exit(1);
 }
 
 console.log('Using Supabase URL:', supabaseUrl);
 console.log('Anon Key present:', supabaseKey ? 'Yes' : 'No');
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Only create client if credentials are available
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 async function createWaitlistTable() {
+  if (!supabase) {
+    console.error('Cannot create waitlist table: Supabase client not initialized');
+    return false;
+  }
+  
   try {
     console.log('Checking if waitlist table exists...');
     

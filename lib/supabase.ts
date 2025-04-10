@@ -1,26 +1,33 @@
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-// Initialize with empty values - helps with TypeScript
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-
-// Log warning if credentials are missing
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Missing Supabase credentials. Waitlist functionality may not work properly.');
-  console.log('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing');
-  console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Set' : 'Missing');
+// Function to get Supabase client on demand
+export function getSupabaseClient(): SupabaseClient | null {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Missing Supabase credentials. Waitlist functionality may not work properly.');
+    console.log('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing');
+    console.log('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Set' : 'Missing');
+    return null;
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey);
 }
 
-// Create Supabase client - this will work with TypeScript
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+// For backward compatibility, create a supabase export
+// This will be undefined during build time but will be created on demand in the browser
+export const supabase = typeof window !== 'undefined' ? getSupabaseClient() : null;
 
 export async function addToWaitlist(email: string) {
   try {
     console.log("Starting waitlist submission process for:", email);
     
-    // Check for valid credentials
-    if (!supabaseUrl || !supabaseAnonKey) {
+    const supabaseClient = getSupabaseClient();
+    
+    // Check for valid credentials and client
+    if (!supabaseClient) {
       return { 
         success: false, 
         error: new Error('Supabase not configured'), 
@@ -38,7 +45,7 @@ export async function addToWaitlist(email: string) {
     
     // Check connection to Supabase
     try {
-      const { error: pingError } = await supabase.from('waitlist').select('count').limit(0);
+      const { error: pingError } = await supabaseClient.from('waitlist').select('count').limit(0);
       if (pingError) {
         console.error('Supabase connection error:', pingError);
         if (pingError.code === '42P01') {
@@ -73,7 +80,7 @@ export async function addToWaitlist(email: string) {
     }
 
     // Check if email already exists to provide better feedback
-    const { data: existingUser, error: checkError } = await supabase
+    const { data: existingUser, error: checkError } = await supabaseClient
       .from('waitlist')
       .select('email')
       .eq('email', email)
@@ -105,7 +112,7 @@ export async function addToWaitlist(email: string) {
 
     // Insert new email
     console.log('Inserting new email into waitlist:', email);
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('waitlist')
       .insert([{ email }])
       .select();

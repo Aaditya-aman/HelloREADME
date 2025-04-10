@@ -49,12 +49,18 @@ export default function Home() {
     
     try {
       // Check if Supabase is properly configured
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        // Fallback for demo mode - just show success message
-        console.log("Demo mode - no actual Supabase connection.");
-        toast.success("Thank you for your interest! This is a demo, so no data was saved.");
-        setEmail("");
-        setIsSubmitting(false);
+      const isDemoMode = typeof window !== 'undefined' && 
+                       (!process.env.NEXT_PUBLIC_SUPABASE_URL || 
+                        !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+      
+      if (isDemoMode) {
+        // Demo mode - just show success message
+        console.log("Demo/preview mode - no actual Supabase connection");
+        setTimeout(() => {
+          toast.success("Thanks for your interest! Your email would be added in production.");
+          setEmail("");
+          setIsSubmitting(false);
+        }, 1000);
         return;
       }
       
